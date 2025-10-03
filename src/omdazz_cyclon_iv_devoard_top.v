@@ -101,16 +101,36 @@ assign reset   = 1'b0     ;
 assign aresetn = RESET_BTN;
 assign aclk    = FPGA_CLK ;
 
-assign BEEP    = 1'b1;
+wire [7:0] w_note;
+wire w_busser;
 
-assign LED1    = KEY1;
-assign LED2    = KEY2;
-assign LED3    = KEY3;
-assign LED4    = KEY4;
+assign w_note = (KEY1 == 1'b0) ? 
+                (8'd60) : 
+                (
+                    (KEY2 == 1'b0) ? 
+                    (8'd62) :
+                    (
+                        (KEY3 == 1'b0) ? 
+                        (8'd64) :
+                        (
+                            (KEY4 == 1'b0) ? 
+                            (8'd65) :
+                            (8'd00)
+                        )
+                    )
+                );
 
-assign PIN_111 = 1'b0;
 
-assign UART_TXD = 1'b0;
+assign BEEP = RESET_BTN;
+
+assign LED1 = KEY1;
+assign LED2 = KEY2;
+assign LED3 = KEY3;
+assign LED4 = KEY4;
+
+assign PIN_111 = w_busser;
+
+assign UART_TXD = UART_RXD;
 
 assign VGA_HSYNC = 1'b0;
 assign VGA_VSYNC = 1'b0;
@@ -142,7 +162,6 @@ assign LCD_D4 = 1'b0;
 assign LCD_D5 = 1'b0;
 assign LCD_D6 = 1'b0;
 assign LCD_D7 = 1'b0;
-
 
 assign S_DQ0   = 1'bZ;
 assign S_DQ1   = 1'bZ;
@@ -182,5 +201,25 @@ assign SD_CS   = 1'bZ;
 assign SD_RAS  = 1'bZ;
 assign SD_CAS  = 1'bZ;
 assign SD_WE   = 1'bZ;
+
+Flash_loader
+Flash_loader_inst 
+(
+	.noe_in(1'b1)  // noe_in.noe
+);
+
+midi
+#(
+    .P_HOL (1'b0)
+)
+midi_inst
+(
+    .note_select (w_note  ),
+    .o_busser    (w_busser),
+    .en          (en      ),
+    .reset       (reset   ),
+    .aresetn     (aresetn ),
+    .aclk        (aclk    ) 
+);
 
 endmodule
